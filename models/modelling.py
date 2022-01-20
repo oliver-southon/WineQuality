@@ -3,7 +3,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, mean_squared_error
+
+from itertools import islice
+import typing
 
 def get_model_fit():
     TEST_SIZE = 0.2
@@ -22,7 +24,7 @@ def get_model_fit():
     features = df_dummies.drop(["quality_category_good", "quality"], axis=1)
 
     # Split Data Into Train/Test
-    X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2) # 8 is my lucky number
+    X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=TEST_SIZE) # 8 is my lucky number
 
     #   Normalise the Data
     normalise = MinMaxScaler()
@@ -36,7 +38,20 @@ def get_model_fit():
 
     return model, fit
 
+# Converts wtform data into 2d array for outcome predictions
+def form_data_2dArray(form_data: typing.Dict, first_n) -> typing.List:
+    test = []
+    insert_test = []
+    for fieldname, value in islice(form_data.items(), first_n):
+        test.append(float(value))
+    insert_test.append(test)
 
+    return insert_test
 
+# 1 = True | 0 = False
+def predict_outcome(model, fit, test: typing.List) -> int:
+    test = fit.transform(test)
+    pred = model.predict(test)
 
+    return int(pred[0])
 

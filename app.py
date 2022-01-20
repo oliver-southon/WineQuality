@@ -1,11 +1,10 @@
 import os
-from itertools import islice
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
 
-from modelling.modelling import get_model_fit
+from models.modelling import get_model_fit, form_data_2dArray, predict_outcome
 
-from form import WineForm
+from models.forms import WineForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '571ebf8e13ca209536c29be68d435c00'
@@ -18,23 +17,21 @@ def predict_outcome(model, fit, test):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    quality=1
+    quality=None # placeholder
     form = WineForm()
 
-    model, fit = get_model_fit()
+    model, fit = get_model_fit() # Create model w/ normalised data once so it can be used every time the form is submitted
 
     if form.validate_on_submit():
-        print('yes')
-
-        test = []
-        insert_test = []
-        for fieldname, value in islice(form.data.items(), 11):
-            test.append(float(value))
-        print(insert_test)
-        insert_test.append(test)
-        quality = predict_outcome(model, fit, insert_test)
-
+        test = form_data_2dArray(form.data, 11) # convert parameters to normalised data
+        quality = predict_outcome(model, fit, test) # Get the outcome
+ 
     return render_template('index.html', form=form, quality=quality)
 
+# For viewing Jupyter Notebook work
+@app.route('/modelling')
+def modelling():
+    return render_template('modelling.html')
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
