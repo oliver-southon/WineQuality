@@ -1,13 +1,14 @@
 import os
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
+from secret_key import secret_key
 
 from models.modelling import get_model_fit, form_data_2dArray, predict_outcome
 
 from models.forms import WineForm
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '571ebf8e13ca209536c29be68d435c00'
+app.config['SECRET_KEY'] = secret_key
 Bootstrap(app)
 
 def predict_outcome(model, fit, test):
